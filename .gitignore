@@ -34,3 +34,13 @@ vignettes/*.pdf
 
 # Shiny token, see https://shiny.rstudio.com/articles/shinyapps.html
 rsconnect/
+
+## Added by RAV
+# Mac files
+.DS_Store
+
+# RStudio
+.rstudio-desktop
+
+# Vi temporary files
+*~
