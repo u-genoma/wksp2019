@@ -110,7 +110,7 @@ IBRresults<-c("rster", "MTpvalue", "MTr")
     
     # Plot
     DistPlot(get(paste0("B.",i)), B.FstLin, plotnames=FALSE,
-            ylabel=expression("F"[ST]*"/(1 / "[FST]*")"), xlabel=paste("Effective distance", i))
+            ylabel=expression("F"[ST]*"/(1 / F"[ST]*")"), xlabel=paste("Effective distance", i))
                
     # get info for df  
     MTpvalue<-round(x$pvalue, 6)
