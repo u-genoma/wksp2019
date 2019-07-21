@@ -124,7 +124,7 @@ docker/whalesay     latest              6b362a9f73eb        9 months ago        
 2) Cargamos la imagen dentro de un contenedor con `run`. Voilá, estamos dentro de un Ubuntu, específicamente dentro de un **contenedor** corriendo Ubuntu.
       
 ```
-$ docker run -it ubuntu bash
+$ docker run -it ubuntu:14.04 bash
 root@8f36b66384cb:/# 
 root@8f36b66384cb:/# ls
 bin   dev  home  lib64  mnt  proc  run   srv  tmp  var
@@ -137,45 +137,7 @@ Prueba
 
 **Pregunta**: ¿Qué significa el `#` en vez del `$`?
 
-
-3) Es una versión tan básica de Ubuntu que prácticamente nada viene pre-instalado, y si sí, no en su última versión. Por eso es buena idea correr `apt-get update`:
-
-```
-# apt-get update
-Ign http://archive.ubuntu.com trusty InRelease
-Get:1 http://archive.ubuntu.com trusty-updates InRelease [65.9 kB]
-Get:2 http://archive.ubuntu.com trusty-security InRelease [65.9 kB]
-Hit http://archive.ubuntu.com trusty Release.gpg     
-Hit http://archive.ubuntu.com trusty Release         
-Get:3 http://archive.ubuntu.com trusty-updates/main Sources [328 kB]
-Get:4 http://archive.ubuntu.com trusty-updates/restricted Sources [5217 B]
-Get:5 http://archive.ubuntu.com trusty-updates/universe Sources [190 kB]
-Get:6 http://archive.ubuntu.com trusty-updates/main amd64 Packages [910 kB]    
-Get:7 http://archive.ubuntu.com trusty-updates/restricted amd64 Packages [23.5 kB]
-Get:8 http://archive.ubuntu.com trusty-updates/universe amd64 Packages [440 kB]
-Get:9 http://archive.ubuntu.com trusty-security/main Sources [134 kB]          
-Get:10 http://archive.ubuntu.com trusty-security/restricted Sources [3920 B]   
-Get:11 http://archive.ubuntu.com trusty-security/universe Sources [39.1 kB]    
-Get:12 http://archive.ubuntu.com trusty-security/main amd64 Packages [542 kB]  
-Get:13 http://archive.ubuntu.com trusty-security/restricted amd64 Packages [20.2 kB]
-Get:14 http://archive.ubuntu.com trusty-security/universe amd64 Packages [162 kB]
-Get:15 http://archive.ubuntu.com trusty/main Sources [1335 kB]                 
-Get:16 http://archive.ubuntu.com trusty/restricted Sources [5335 B]            
-Get:17 http://archive.ubuntu.com trusty/universe Sources [7926 kB]             
-Get:18 http://archive.ubuntu.com trusty/main amd64 Packages [1743 kB]          
-Get:19 http://archive.ubuntu.com trusty/restricted amd64 Packages [16.0 kB]    
-Get:20 http://archive.ubuntu.com trusty/universe amd64 Packages [7589 kB]      
-Fetched 21.5 MB in 27s (778 kB/s)                                              
-Reading package lists... Done
-```
-
-5) Y ahora sí, podemos instalar herramientas, por ejemplo `curl`:
-
-```
-# apt-get install curl
-```
-
-5) Cuando termines puedes salir (`exit`) de este contenedor. Los cambios que hayas hecho **no se guardarán en la imagen**, pero **sí en el contenedor que se creó al correrla**. 
+Escribe algunos comandos. Cuando termines `exit` para salir.
 
 Vamos a ver qué contenedores tenemos:
 
@@ -195,7 +157,7 @@ $ docker start 8f36b66384cb
 8f36b66384cb 
 ```
 
-Ahora aparecerá en la lista de contenedores activos (`docker ps` SIN `-a`.
+Ahora aparecerá en la lista de contenedores activos (`docker ps` SIN `-a`).
 
 ```
 $ docker ps
@@ -250,48 +212,42 @@ Si quieres borrar contenedores o imágenes (son espacio en disco):
 
 Ejemplo con una imagen de Ubuntu.
 
-1) Enlista las imagenes para asegurarte tener una de Ubuntu:
+Corre la imagen de ubuntu dentro de un contenedor, pero **montando un volumen**, es decir un directorio en tu equipo que podrá ser accedido por el contenedor:
 
 ```
-$ docker images
-REPOSITORY             TAG                 IMAGE ID            CREATED             SIZE
-miproyecto/analisis1   v1                  b951cd1b24b5        12 hours ago        188 MB
-ubuntu                 latest              07c86167cdc4        13 days ago         188 MB
-hello-world            latest              690ed74de00f        5 months ago        960 B
-```
-
-Ya debes tener una imagen de ubuntu (si seguiste las notas anteriores), si no `docker  pull ubuntu`.
-
-3) Corre la imagen de ubuntu dentro de un contenedor, pero **montando un volumen**, es decir un directorio en tu equipo que podrá ser accedido por el contenedor:
-
-```
-docker run -v /Users/ticatla/hubiC/Science/Teaching/Mx/BioinfInvgRepro/BioinfinvRepro/Unidad4/Prac_Uni4/DatosContenedor1:/DatosContenedorEjercicioClase -it ubuntu bash
+docker run --rm  -v [RUTA_ABSOLUTA]:/nombredirContenedor -it ubuntu bash
 ```
 
 Desglozando el comando anterior:
 
 `-v` es la bandera para indicar que queremos que monte un volumen 
 
-`/Users/ticatla/hubiC/Science/Teaching/Mx/BioinfInvgRepro/BioinfinvRepro/Unidad4/Prac_Uni4/DatosContenedor1` es la ruta **absoluta**. Sí, absoluta (así que cambiala por la ruta de tu equipo) ya que así es cuando se trata de montar volúmenes :(. 
+`[RUTA_ABSOLUTA]` es la ruta **absoluta** (así que cambiala por la ruta de tu equipo) al directorio de tu equipo a donde quieres darle acceso al contenedor. Para no hacer un chorizo, te recomiendo crear primero por fuera una variable, por ejemplo así:
 
-`:/DatosContenedorEjercicioClase` es el nombre del directorio como quremos que aparezca dentro de nuestro contenedor. El `:/` es para indicar que lo que sigue es el nombre.
+Asumiendo que estás en `Unidad2/Docker/Prac_docker`.
+
+```
+$ pwd
+Unidad2/Docker/Prac_docker
+$ midirectorio=$(pwd)
+$ docker run --rm  -v $midirectorio:/nombredirContenedor -it ubuntu bash
+
+```
+
+ 
+
+`:/nombredirContenedor` es el nombre del directorio como quremos que aparezca dentro de nuestro contenedor. El `:/` es para indicar que lo que sigue es el nombre.
 
 4) Explora el volumen que montaste, prueba hacer un archivo. Nota que puedes acceder a el desde tu explorador, es decir todo lo que suceda en ese directorio puedes verlo/modificarlo desde dentro y fuera del contenedor. 
 
 ```
 root@dd4667e94adb:/# ls
-DatosContenedorEjercicioClase  bin  boot  dev  etc  home  lib  lib64  media  mnt  opt  proc  root  run  sbin  srv  sys  tmp  usr  var
-root@dd4667e94adb:/# cd DatosContenedorEjercicioClase/
-root@dd4667e94adb:/DatosContenedorEjercicioClase# ls
-eg_ddRAD_data.fastq
-root@dd4667e94adb:/DatosContenedorEjercicioClase# touch Prueba
-root@dd4667e94adb:/DatosContenedorEjercicioClase# ls
-Prueba  eg_ddRAD_data.fastq
+
 ```
 
-## Agregar ejemplo rocker y hablar de Dockerhub
-
 ## Dockerhub 
+
+Dockerhub es un repositorio parecido a Github, pero especializado en dockerfiles. Cuando utilizas el comando `docker pull` el pull se hace desde Dockerhub. 
 
 
 #### Dockerfiles
@@ -302,10 +258,39 @@ Lo anterior se hace a través de un **dockerfile**, es decir un script que descr
 
 Es decir un dockerfile nos permite construir y compartir una imagen especializada en correr el proceso que deseemos.
 
+
+**Ejemplo de uso de Dockerhub**
+
+Cualquiera puede abrir una cuenta en Dockerhub, esto permite que podamos subir nuestras propias recetas (dockerfiles) y que otros las jalen con `docker pull`.
+
+Para preparar esta clase 
+
+Commit a docker con el nombre del contendor editado (rstudio_21 en este ejemplo) y el nuevo nombre que queremos en nuestra cuenta de Dockerhub, incluir la versión después de `:`.
+
+```
+docker commit rstudio_21 aliciamstt/rstudio_wksp2019:v1
+```
+
+Si revisamos con `docker images` ahora deberá haber una imagen con el nombre que le dimos en el comando de arriba.
+
+Hacer log in a docker con las credenciales de nuestra cuenta en Dockerhub:
+
+
+```
+docker login
+```
+
+Hacemos el push de la imagen:
+
+```
+docker push aliciamstt/rstudio_wksp2019:v1
+```
+
+
+
+### Biocontainers
+
 Veamos un dockerfile como [este](https://github.com/BioContainers/containers/blob/master/fastxtools/0.0.14/Dockerfile) que instala el programa FastXTools en un contenedor.
-
-## Biocontainers
-
 
 El dockerfile del ejercicio anterior vive en el [github de Biocontainers](https://github.com/Biocontainers/). Y además en  [DockerHub de Biocontainers](https://hub.docker.com/u/biocontainers/), por lo que podemos hacer un `pull` desde ahí.
 
@@ -326,7 +311,7 @@ curl: try 'curl --help' or 'curl --manual' for more information
 
 **Observaciones y preguntas**:
 
-* En vez de ser root (´#´ al inicio de la línea de comando) como es el default de docker, somos un usuario normal y estamos en un directorio llamado ´data´. ¿Con qué líneas del dockerfile se realizó esto?
+* En vez de ser root (´#´ al inicio de la línea de comando) como es el default de docker, somos un usuario normal y estamos en un directorio llamado `data`. ¿Con qué líneas del dockerfile se realizó esto?
 
 
 * La línea 100 del dockerfile dice `VOLUME ["/data", "/config"]` ¿Qué significa esto?
@@ -345,7 +330,7 @@ $ docker pull biocontainers/vcftools:0.1.15 :0.1.15
 Yo puedo entrar a estos contenedores con `-it /bin/bash` como lo hemos hecho antes, pero también puedo utilizarlo para **solo** correr el programa con un comando concreto. Por ejemplo, mostrar la ayuda:
 
 ```
-$ docker run biocontainers/vcftools:0.1.15 vcftools -help
+$ docker run -rm biocontainers/vcftools:0.1.15 vcftools -help
 
 VCFtools (0.1.14)
 © Adam Auton and Anthony Marcketta 2009
@@ -366,7 +351,7 @@ Questions, comments, and suggestions should be emailed to:
 o en FastX-tools:
 
 ```
-$ docker run biocontainers/fastxtools:0.0.14 fastq_to_fasta -h
+$ docker run -rm biocontainers/fastxtools:0.0.14 fastq_to_fasta -h
 usage: fastq_to_fasta [-h] [-r] [-n] [-v] [-z] [-i INFILE] [-o OUTFILE]
 Part of FASTX Toolkit 0.0.14 by A. Gordon (assafgordon@gmail.com)
 
@@ -389,7 +374,7 @@ Part of FASTX Toolkit 0.0.14 by A. Gordon (assafgordon@gmail.com)
 
 ### Tip: borrar automáticamente un contenedor cuando acaba de correr
 
-Cada vez que utilizamos `docker run` se **crea** un contendor nuevo. Por ejemplo si corriste los `docker run` de fastxtools y vcftools de arriba:
+Cada vez que utilizamos `docker run` se **crea** un contendor nuevo. Por ejemplo si corrieras los `docker run` de fastxtools y vcftools de arriba sin el flag `--rm` obtendrías:
 
 ```
 $ docker ps -a
@@ -401,7 +386,7 @@ CONTAINER ID        IMAGE                      COMMAND               CREATED    
 
 Esto ocupa espacio en disco y nos llena de contenedores a los que no volveremos a entrar. La solución: borrar un contenedor al salir. 
 
-Esto se hace con el flag `--rm` para que se borre al salir. **Más** una de estas dos opciones: 
+Esto se hace con el flag `--rm` para que se borre al salir. Además se puede agregar una de estas dos opciones: 
 
 1) Indicandole al contenedor que se salga al terminar de correr, agregando `-c exit` al comandos que queremos que corra. Ejemplo:
 
@@ -501,7 +486,6 @@ Si te quedan dudas sobre Docker y cómo aplicarlo a Bionformática revisa esta e
 
 **RECOMENDACIONES**
 
-* En lugar de poner líneas tan largas como las de arriba párte comando por comando utilizando `\`, que es como `;` pero puedes dar enter y continuar en la línea de abajo.
 
 * Declara una variable con la ruta absoluta al inicio de tu script y luego utilizala dentro de tu línea de `docker run -v`. 
 
@@ -511,26 +495,6 @@ Si te quedan dudas sobre Docker y cómo aplicarlo a Bionformática revisa esta e
 
 
 
-Commit a docker con el nombre del contendor editado (rstudio_21 en este ejemplo) y el nuevo nombre que queremos en nuestra cuenta de Dockerhub, incluir la versión después de `:`.
-
-```
-docker commit rstudio_21 aliciamstt/rstudio_wksp2019:v1
-```
-
-Si revisamos con `docker images` ahora deberá haber una imagen con el nombre que le dimos en el comando de arriba.
-
-Hacer log in a docker con las credenciales de nuestra cuenta en Dockerhub:
-
-
-```
-docker login
-```
-
-Hacemos el push de la imagen:
-
-```
-docker push aliciamstt/rstudio_wksp2019:v1
-```
 
 
 
