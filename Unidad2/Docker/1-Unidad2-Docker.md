@@ -97,7 +97,7 @@ Veámoslo con un ejemplo:
 1) Bajar (*pullear*) una imagen con `pull`. Por ejemplo la última versión de ubuntu: 
 
 ```
-$ docker pull ubuntu #Baja la última versión de ubuntu 
+$ docker pull ubuntu:14.04 #Baja la versión 14.04 de ubuntu 
 Using default tag: latest
 latest: Pulling from library/ubuntu
 
@@ -108,15 +108,14 @@ a3ed95caeb02: Pull complete
 Digest: sha256:4e85ebe01d056b43955250bbac22bdb8734271122e3c78d21e55ee235fc6802d
 Status: Downloaded newer image for ubuntu:latest
 ```
- 
-Aquí por default bajó la última, pero también hubieramos podido especificar qué versión de ubuntu queríamos, así:  `docker pull ubuntu:14.04`
+
  
 Para revisar hayamos bajado la imagen deseada:
 
 ```
 $ docker images #Enlista imagenes ya bajadas
 REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
-ubuntu              latest              07c86167cdc4        11 days ago         188 MB
+ubuntu              14.04             07c86167cdc4        11 days ago         188 MB
 hello-world         latest              690ed74de00f        5 months ago        960 B
 docker/whalesay     latest              6b362a9f73eb        9 months ago        247 MB
 ```    
@@ -207,6 +206,13 @@ Si quieres borrar contenedores o imágenes (son espacio en disco):
 
 * Borrar una imagen: `docker rmi -f IMAGE_ID`
 
+#### Tip: borrar automáticamente un contenedor cuando acaba de correr
+
+Cada vez que utilizamos `docker run` se **crea** un contendor nuevo. 
+
+Esto ocupa espacio en disco y nos llena de contenedores a los que no volveremos a entrar. La solución: borrar un contenedor al salir. 
+
+Esto se hace con el flag `--rm` a `docker run`.
 
 #### "Conectar" un contenedor con un directorio dentro del OS nativo, aka "montar un volumen":
 
@@ -230,20 +236,14 @@ Asumiendo que estás en `Unidad2/Docker/Prac_docker`.
 $ pwd
 Unidad2/Docker/Prac_docker
 $ midirectorio=$(pwd)
-$ docker run --rm  -v $midirectorio:/nombredirContenedor -it ubuntu bash
+$ docker run --rm  -v $midirectorio:/nombredirContenedor -it ubuntu:14.04 bash
 
 ```
-
- 
 
 `:/nombredirContenedor` es el nombre del directorio como quremos que aparezca dentro de nuestro contenedor. El `:/` es para indicar que lo que sigue es el nombre.
 
 4) Explora el volumen que montaste, prueba hacer un archivo. Nota que puedes acceder a el desde tu explorador, es decir todo lo que suceda en ese directorio puedes verlo/modificarlo desde dentro y fuera del contenedor. 
 
-```
-root@dd4667e94adb:/# ls
-
-```
 
 ## Dockerhub 
 
@@ -263,9 +263,18 @@ Es decir un dockerfile nos permite construir y compartir una imagen especializad
 
 Cualquiera puede abrir una cuenta en Dockerhub, esto permite que podamos subir nuestras propias recetas (dockerfiles) y que otros las jalen con `docker pull`.
 
-Para preparar esta clase 
+Para preparar esta clase utilicé como base una imagen que permite correr Rstudio via un explorador web. Esta imagen vive en el Dockerhub de R, llamado, yes: [rocker](https://hub.docker.com/u/rocker/). En concreto usé `docker pull rocker/tidyverse`, pues esta imagen es `rocker/rstudio` + los paquetes del tidyverse ya instalados en R. La corrí de esta manera:
 
-Commit a docker con el nombre del contendor editado (rstudio_21 en este ejemplo) y el nuevo nombre que queremos en nuestra cuenta de Dockerhub, incluir la versión después de `:`.
+```
+$ dir_montar=
+$ docker run -d -p 8787:8787 -e USERID=$UID -e PASSWORD=bioinfo12016 --name rstudio_21 -v $d/home/bioinfo1:/home/rstudio/ rocker/tidyverse
+```
+
+El comando anterior levanta el contenedor con Rstudio, mismo que ya es accesible con la dirección el host en el puerto 8787:8787. 
+
+Sin embargo, me hacían falta también algunos otros paquetes de R que utilizan los scripts vistos en clase: como `ade4` y `vegan`. En lugar de gastar tiempo en clase instalándolos, los instalé en este contenedor y luego:
+
+1) Commit a docker con el nombre del contendor editado (rstudio_21 en este ejemplo) y el nuevo nombre que queremos en mi cuenta de Dockerhub (aliciamstt), incluir la versión después de `:`.
 
 ```
 docker commit rstudio_21 aliciamstt/rstudio_wksp2019:v1
@@ -273,17 +282,31 @@ docker commit rstudio_21 aliciamstt/rstudio_wksp2019:v1
 
 Si revisamos con `docker images` ahora deberá haber una imagen con el nombre que le dimos en el comando de arriba.
 
-Hacer log in a docker con las credenciales de nuestra cuenta en Dockerhub:
+Tras bambalinas, el comando anterior creó un dockerfile con los cambios hechos sobre el dockerfile original.
+
+2) Hacer log in a docker con las credenciales de nuestra cuenta en Dockerhub:
 
 
 ```
 docker login
 ```
 
-Hacemos el push de la imagen:
+3) Hacemos el push de la imagen:
 
 ```
 docker push aliciamstt/rstudio_wksp2019:v1
+```
+
+
+
+4) Luego detuve y borré el contenedor rstudio_21, y creé 21 nuevos contenedores, cada uno con un puerto distinto, utilizando la magen `aliciamstt/rstudio_wksp2019:v1`. Con el script
+
+```
+$ cat Rstudio_containers.sh 
+# This script creates 20 docker containers of Rstudio, each with a different port
+
+for i in {01..21}; do 
+docker run -d -p 87$i:8787 -e USERID=$UID -e PASSWORD=bioinfo12016 --name rstudio_$i -v /home/bioinfo1:/home/rstudio aliciamstt/rstudio_wksp2019:v1; done
 ```
 
 
@@ -302,7 +325,7 @@ Vamos a bajar la imagen y correr un contenedor:
 
 ```
 $ docker pull biocontainers/biocontainers
-$ docker run -it biocontainers/biocontainers /bin/bash
+$ docker run --rm -it biocontainers/biocontainers /bin/bash
 biodocker@4c1831e1f7f7:/data$
 $ curl   
 curl: try 'curl --help' or 'curl --manual' for more information
@@ -311,8 +334,9 @@ curl: try 'curl --help' or 'curl --manual' for more information
 
 **Observaciones y preguntas**:
 
-* En vez de ser root (´#´ al inicio de la línea de comando) como es el default de docker, somos un usuario normal y estamos en un directorio llamado `data`. ¿Con qué líneas del dockerfile se realizó esto?
+* `curl` está instalado, lo que no ocurre en el contendor base de ubuntu.
 
+* En vez de ser root (´#´ al inicio de la línea de comando) como es el default de docker, somos un usuario normal y estamos en un directorio llamado `data`. ¿Con qué líneas del dockerfile se realizó esto?
 
 * La línea 100 del dockerfile dice `VOLUME ["/data", "/config"]` ¿Qué significa esto?
 
@@ -324,13 +348,13 @@ Pero además del contendor básico biocontainers tenemos contenedores con ese so
 
 ```
 $ docker pull biocontainers/fastxtools:0.0.14
-$ docker pull biocontainers/vcftools:0.1.15 :0.1.15
+$ docker pull biocontainers/vcftools:0.1.15
 ```
 
 Yo puedo entrar a estos contenedores con `-it /bin/bash` como lo hemos hecho antes, pero también puedo utilizarlo para **solo** correr el programa con un comando concreto. Por ejemplo, mostrar la ayuda:
 
 ```
-$ docker run -rm biocontainers/vcftools:0.1.15 vcftools -help
+$ docker run --rm biocontainers/vcftools:0.1.15 vcftools -help
 
 VCFtools (0.1.14)
 © Adam Auton and Anthony Marcketta 2009
@@ -351,7 +375,7 @@ Questions, comments, and suggestions should be emailed to:
 o en FastX-tools:
 
 ```
-$ docker run -rm biocontainers/fastxtools:0.0.14 fastq_to_fasta -h
+$ docker run --rm biocontainers/fastxtools:0.0.14 fastq_to_fasta -h
 usage: fastq_to_fasta [-h] [-r] [-n] [-v] [-z] [-i INFILE] [-o OUTFILE]
 Part of FASTX Toolkit 0.0.14 by A. Gordon (assafgordon@gmail.com)
 
@@ -369,72 +393,14 @@ Part of FASTX Toolkit 0.0.14 by A. Gordon (assafgordon@gmail.com)
 
 ```
 
-**Ejercicio**: ve a la página [http://biocontainers.pro/docs/101/running-example/](http://biocontainers.pro/docs/101/running-example/) y lee el ejemplo de cómo usar `blast`. 
+**Ejercicio**: ve a la página [https://biocontainers-edu.biocontainers.pro/en/latest/running_example.html](https://biocontainers-edu.biocontainers.pro/en/latest/running_example.html) y lee el ejemplo de cómo usar `blast`. 
 
 
-### Tip: borrar automáticamente un contenedor cuando acaba de correr
 
-Cada vez que utilizamos `docker run` se **crea** un contendor nuevo. Por ejemplo si corrieras los `docker run` de fastxtools y vcftools de arriba sin el flag `--rm` obtendrías:
+Si te quedan dudas sobre Docker y cómo aplicarlo a Bionformática revisa esta excelente [sección de ayuda de Biocontainers](https://biocontainers-edu.biocontainers.pro/en/latest/introduction.html).
 
-```
-$ docker ps -a
-CONTAINER ID        IMAGE                      COMMAND               CREATED             STATUS                      PORTS               NAMES
-5750fafe938a        biocontainers/vcftools     "vcftools -help"      2 seconds ago       Exited (0) 3 seconds ago                        practical_yonath
-4845c81d1dc6        biocontainers/fastxtools   "fastq_to_fasta -h"   17 seconds ago      Exited (1) 17 seconds ago                       elastic_villani
 
-```
-
-Esto ocupa espacio en disco y nos llena de contenedores a los que no volveremos a entrar. La solución: borrar un contenedor al salir. 
-
-Esto se hace con el flag `--rm` para que se borre al salir. Además se puede agregar una de estas dos opciones: 
-
-1) Indicandole al contenedor que se salga al terminar de correr, agregando `-c exit` al comandos que queremos que corra. Ejemplo:
-
-```
-$ docker run --rm biocontainers/fastxtools:0.0.14 fastq_to_fasta -h -c exit
-usage: fastq_to_fasta [-h] [-r] [-n] [-v] [-z] [-i INFILE] [-o OUTFILE]
-Part of FASTX Toolkit 0.0.14 by A. Gordon (assafgordon@gmail.com)
-
-   [-h]         = This helpful help screen.
-   [-r]         = Rename sequence identifiers to numbers.
-   [-n]         = keep sequences with unknown (N) nucleotides.
-                  Default is to discard such sequences.
-   [-v]         = Verbose - report number of sequences.
-                  If [-o] is specified,  report will be printed to STDOUT.
-                  If [-o] is not specified (and output goes to STDOUT),
-                  report will be printed to STDERR.
-   [-z]         = Compress output with GZIP.
-   [-i INFILE]  = FASTA/Q input file. default is STDIN.
-   [-o OUTFILE] = FASTA output file. default is STDOUT.
-$ docker ps -a
-CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
-```
-
-2) El flag `-c`  en realidad sirve para pedirle que corra más de un comando dentro del mismo contenedor (unidos por ejemplo con `|`, `;`, etc) Si corres el contenedor con `bash` y los comandos deseados entre "" automáticamente se saldrá (sin tenerle que decir `exit`) al terminar de correr todos los comandos. Ejemplo:
-
-```
-$ docker run --rm biocontainers/fastxtools:0.0.14 bash -c "fastq_to_fasta -h ; echo hola mundo"
-usage: fastq_to_fasta [-h] [-r] [-n] [-v] [-z] [-i INFILE] [-o OUTFILE]
-Part of FASTX Toolkit 0.0.14 by A. Gordon (assafgordon@gmail.com)
-
-   [-h]         = This helpful help screen.
-   [-r]         = Rename sequence identifiers to numbers.
-   [-n]         = keep sequences with unknown (N) nucleotides.
-                  Default is to discard such sequences.
-   [-v]         = Verbose - report number of sequences.
-                  If [-o] is specified,  report will be printed to STDOUT.
-                  If [-o] is not specified (and output goes to STDOUT),
-                  report will be printed to STDERR.
-   [-z]         = Compress output with GZIP.
-   [-i INFILE]  = FASTA/Q input file. default is STDIN.
-   [-o OUTFILE] = FASTA output file. default is STDOUT.
-
-hola mundo
-$ docker ps -a
-CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
-```
-
-Si te quedan dudas sobre Docker y cómo aplicarlo a Bionformática revisa esta excelente [sección de ayuda de Biocontainers](http://biocontainers.pro/docs/101/intro/).
+Si quieres jugar con Docker sin instalarlo en tu equipo, ve a [Play with Docker](https://labs.play-with-docker.com/)
 
 
 
@@ -459,7 +425,7 @@ Si te quedan dudas sobre Docker y cómo aplicarlo a Bionformática revisa esta e
 
 `docker pull [IMAGEN]` para bajar la imagen base donde trabajaras
 
- `docker run -v [-v [RutaABSOLUTAaldirectorioDeseado:/nombrevolumen]] -it [IMAGEN] bash` para crear y correr el contenedor con la imagen de forma interactiva ("entrando") y con un volumen montado a un directorio de nuestra compu donde queramos escribir/leer datos. Ejemplo: `docker run -v /Users/ticatla/hubiC/Science/Teaching/Mx/BioinfInvgRepro/BioinfinvRepro/Unidad4/Prac_Uni4/DatosContenedor1:/DatosContenedorEjercicioClase -it ubuntu bash`
+ `docker run -v [-v [RutaABSOLUTAaldirectorioDeseado:/nombrevolumen]] -it [IMAGEN] bash` para crear y correr el contenedor con la imagen de forma interactiva ("entrando") y con un volumen montado a un directorio de nuestra compu donde queramos escribir/leer datos. Ejemplo: ``
  
   OJO: cada vez que haces `docker run` se **crea** un contenedor **distinto** a partir de la misma imagen. Para **no llenarte de contenedores** utiliza `docker run --rm`.
  
@@ -479,20 +445,10 @@ Si te quedan dudas sobre Docker y cómo aplicarlo a Bionformática revisa esta e
  
  `docker run --rm -v [RutaABSOLUTAaldirectorioDeseado:/data]  [biocontainers/IMAGEN] [COMANDOS del sofware en cuestión] -c exit` para correr el contenedor de una imagen de biocontainers con los comandos específicos de un software dado, con volumen montado a un directorio de nuestra compu donde queramos escribir/leer datos y de tal forma que el contenedor se borre automáticamente al terminar el proceso. Ejemplo:
  
-`docker run --rm -v /Users/ticatla/hubiC/Science/Teaching/Mx/BioinfInvgRepro/BioinfinvRepro/Unidad4/Prac_Uni4/DatosContenedor1/datos:/data biocontainers/fastxtools:0.0.14 bash -c "fastx_trimmer -f 1 -l 70 -i human_Illumina_dataset.fastq -v | fastq_quality_filter -q 20 -p 90 -o clean_human_data.fastq -v ; exit"`
+`docker run --rm -v $(pwd):/data biocontainers/fastxtools:0.0.14 bash -c "fastx_trimmer -f 1 -l 70 -i human_Illumina_dataset.fastq -v | fastq_quality_filter -q 20 -p 90 -o clean_human_data.fastq -v ; exit"`
 
 
-(Estos datos ejemplo vienen de [Galaxy Data Libraries](https://usegalaxy.org/library/list#folders/F5bee13e9f312df25/datasets/99fa250d93e003f7) y son de libre uso)
-
-**RECOMENDACIONES**
-
-
-* Declara una variable con la ruta absoluta al inicio de tu script y luego utilizala dentro de tu línea de `docker run -v`. 
-
-**Ejercicio**: corre el ejemplo anterior (el de limpiar `human_Illumina_dataset.fastq`) utilizando una variable declarada antes de `docker run...` para ajustando la ruta absoluta a tu equipo. 
-
-
-
+(Los datos del ejemplo vienen de [Galaxy Data Libraries](https://usegalaxy.org/library/list#folders/F5bee13e9f312df25/datasets/99fa250d93e003f7) y son de libre uso)
 
 
 
