@@ -176,7 +176,7 @@ Notarás que se pueden ejecutar las líneas de código de forma independiente e 
 
 Cuando abres o creas un archivo Rmd la interfaz de RStudio cambia. Ahora, puedes ejecutar el código usando las flechas y los resultados se despliegan a continuación del código.
 
-Abre por ejemplo el archivo [Graficar_en_R.Rmd](../Unidad1/R/Graficar_en_R.Rmd), que es el que utilicé para realizar las notas de esa clase. Fíjate en lo que dicen algunos chunks ¿qué crees que haga `echo=FALSE`?
+Abre por ejemplo el archivo [Graficar_en_R.Rmd](../../Unidad1/R/Graficar_en_R.Rmd), que es el que utilicé para realizar las notas de esa clase. Fíjate en lo que dicen algunos chunks ¿qué crees que haga `echo=FALSE`?
 
 
 
@@ -203,7 +203,7 @@ Cuando se renderea un archivo .Rmd, también se crea un archivo html. Este es un
 
 Es posible generar un reporte a partir de un script de R, aún cuando **no tenga el formato de un archivo R Markdown**. Únicamente das click en el cuaderno (Compile report) o Ctrl+Shift+K.
 
-Prueba hacer lo anterior con el archivo [1.IBR_testing.r](../Unidad1/R/Prac_R/mantel/1.IBR_testing.r) que vimos antes.
+Prueba hacer lo anterior con el archivo [1.IBR_testing.r](../../Unidad1/R/Prac_R/mantel/1.IBR_testing.r) que vimos antes.
 
 
 #### ¿Rmd o reporte de script.R?
