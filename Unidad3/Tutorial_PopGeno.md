@@ -11,7 +11,41 @@ Date           : 2019-07-08
 
 ## Ricardo A. Verdugo
 
-[TOC]
+## Tabla de contenidos
+* [Tabla de contenidos](#tabla-de-contenidos)
+    * [Acerca de este tutorial](#acerca-de-este-tutorial)
+    * [Descripción de los datos](#descripción-de-los-datos)
+    * [Formato de archivos PLINK](#formato-de-archivos-plink)
+ * [Preámbulo](#preámbulo)
+    * [Conectarse al servidor](#conectarse-al-servidor)
+       * [Usuarios MAC](#usuarios-mac)
+    * [Ubicación de los datos](#ubicación-de-los-datos)
+    * [Generar un directorio de trabajo](#generar-un-directorio-de-trabajo)
+ * [Parte 1: Análisis de control de calidad](#parte-1-análisis-de-control-de-calidad)
+    * [Paso 1](#paso-1)
+       * [Tarea:](#tarea)
+    * [Paso 2](#paso-2)
+       * [Tarea:](#tarea-1)
+    * [Paso 3: Filtrado de SNPs](#paso-3-filtrado-de-snps)
+       * [Tarea](#tarea-2)
+    * [Paso 4: Borrar SNPs por filtro de HWE](#paso-4-borrar-snps-por-filtro-de-hwe)
+       * [Tarea](#tarea-3)
+    * [Paso 5: Eliminar parentescos desconocidos](#paso-5-eliminar-parentescos-desconocidos)
+       * [Tarea](#tarea-4)
+ * [Parte 2: Unir datos locales con 1000G](#parte-2-unir-datos-locales-con-1000g)
+    * [Paso 1: Merge de los datos ChileGenomico con 1000G](#paso-1-merge-de-los-datos-chilegenomico-con-1000g)
+    * [Paso 2: Homologar la versión del genoma](#paso-2-homologar-la-versión-del-genoma)
+    * [Paso 3: Fusionar los conjuntos de datos HapMap y 1000 Genomes](#paso-3-fusionar-los-conjuntos-de-datos-hapmap-y-1000-genomes)
+    * [Paso 4:  Intercambiar alelos de SNPs con potenciales problemas de hebra](#paso-4--intercambiar-alelos-de-snps-con-potenciales-problemas-de-hebra)
+    * [Paso 5: Combinar 1000G con ChileGenomico.](#paso-5-combinar-1000g-con-chilegenomico)
+ * [Parte 3: Análisis de estructura poblacional](#parte-3-análisis-de-estructura-poblacional)
+    * [Paso 1: Realizar MDS en datos HapMap-ChileGenomico](#paso-1-realizar-mds-en-datos-hapmap-chilegenomico)
+    * [Paso 2: Generar un archivo con información de poblaciones](#paso-2-generar-un-archivo-con-información-de-poblaciones)
+    * [Paso 3: Graficar resultados de MDS](#paso-3-graficar-resultados-de-mds)
+       * [Tarea:](#tarea-5)
+    * [Paso 4: Realizar un análisis de ancestría](#paso-4-realizar-un-análisis-de-ancestría)
+       * [Tarea:](#tarea-6)
+    * [Paso 5: Genere gráficos de sus resultados](#paso-5-genere-gráficos-de-sus-resultados)
 
 ### Acerca de este tutorial
 
@@ -669,20 +703,14 @@ Rscript $W/MDS_merged.R
 
 Utilizaremos la herramienta [ADMIXTURE](http://software.genetics.ucla.edu/admixture/) para inferir ancestría de las muestras chilenas asumiendo un modelo simple de mezcla.
 
-#### Filtrar los SNPs
-
 Admixture asumen que los SNPs a usar no están en LD. Tendremos que usar nuevamente nuestro archivo con SNPs en bajo LD, pero esta vez sí crearemos un set plink de datos reducidos
 
 ```sh
 plink --bfile MDS_merge --extract indepSNP.prune.in --make-bed --out MDS_merge_r2_lt_0.2
 ```
 
-#### Tarea:
-
 1. ¿Cuántos SNPs quedaron luego del filtro?
 2. ADMIXTURE asume que los individuos no están emparentados. Sin embargo, no realizamos ningún filtro. ¿Por qué?
-
-### Paso 5: Correr admixture
 
 Ahora sí podemos correr ADMIXTURE.
 
@@ -710,7 +738,12 @@ for k in $(seq 4 6)
   done
 ```
 
-### Paso 6: Genere gráficos de sus resultados
+#### Tarea:
+
+1. ¿Cuántos SNPs quedaron luego del filtro?
+2. ADMIXTURE asume que los individuos no están emparentados. Sin embargo, no realizamos ningún filtro. ¿Por qué?
+
+### Paso 5: Genere gráficos de sus resultados
 
 Primero tenemos que ordenar el archivo con la información de las muestras por públición. Esto es un requisito para el siguiente paso. Aquí elegiremos el orden en el que queremos que se muestren las poblaciones, mediante unos pocos comandos en R.
 
