@@ -215,7 +215,35 @@ Un reporte de un script.R funciona si quieres "guardar cómo se ve" correr un an
 Así que cuándo usar cuál depende de la situación y tus gustos.
 
 
-## Jupyter notebooks 
+## Jupyter notebooks y JupyterLab
+
+### Notebooks
+
+Los notebooks de Jupyter son parecidos a los Rmd. Tienen celdas dedicadas al código y otras al texto en formato md. Originalmente fueron creados para Julia, python y R. De hecho de ahí viene el nombre, pero pueden también integrarse otros kernel, como C++ o Ruby.
+
+El notebook incluye el notebook por sí mismo, una terminal, editor de texto, entre otros.
+
+Los notebooks son un archivo `*.ipynb`, mismo que puede abrirse con Jupyter de forma interactiva o exportarse a html, pdf, etc.
+
+La mejor forma de aprender Jupyter es usarlo directamente. Buenas noticias ¡no hay que instalar nada! puedes correrlo aquí:
+
+[https://jupyter.org/try](https://jupyter.org/try).
+
+
+### JupyterLab
+
+JupyterLab es la nueva interfaz (2018) de Jupyter, permite incorporar los notebooks con más herramientas.
+
+Así se ve:
+
+![Jupyter_lab.png](Jupyter_lab.png)
+
+**Ejercicio**. Entra a [https://jupyter.org/try](https://jupyter.org/try), abre un JupyterLab y le la documentación.
+
+
+
+
+
 
 
 
