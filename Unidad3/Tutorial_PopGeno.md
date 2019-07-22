@@ -108,7 +108,7 @@ plink --bfile $C/chilean_all48_hg19 --missing
 ```
 Este paso generó los siguientes archivos: plink.imiss y plink.lmiss, que muestras la proporción de datos perdidos para cada SNP y para cada y individuo, respectivamente.
 
-## Genere gráficos para visualize los resultados
+Genere gráficos para visualizar los resultados
 ```sh
 Rscript --no-save $T/hist_miss.R
 ```
@@ -407,7 +407,7 @@ $ plink -bfile chilean_all48_hg19_9 -remove to_romeve_by_relatedness.txt -make-b
 
 
 
-## Parte 2: Análisis de estructura poblacional
+## Parte 2: Unir datos locales con 1000G
 
 Para esta parte del tutorial, necesitará los archivo filtrados generados anteriormente:
 chilean_all48_hg19_10.fam, chilean_all48_hg19_10.bim, chilean_all48_hg19_10.bed, y el archivo de SNPs con bajo LD: indepSNP.prune.in.
@@ -570,15 +570,19 @@ plink --bfile 1kG_MDS7 --exclude SNPs_for_exlusion.txt --make-bed --out 1kG_MDS8
 plink --bfile chilean_all48_hg19_14 --exclude SNPs_for_exlusion.txt --make-bed --out chilean_all48_hg19_15
 ```
 
-Combinar HapMap con ChileGenomico.
+### Paso 5: Combinar 1000G con ChileGenomico.
 
 ```sh
 plink --bfile 1kG_MDS8 --bmerge chilean_all48_hg19_14.bed chilean_all48_hg19_14.bim chilean_all48_hg19_14.fam --allow-no-sex --make-bed --out MDS_merge
 ```
 
-## Realizar MDS en datos HapMap-ChileGenomico
 
-Usando un conjunto de SNPs con bajo LD
+
+## Parte 3: Análisis de estructura poblacional
+
+### Paso 1: Realizar MDS en datos HapMap-ChileGenomico
+
+Se asume que los SNPs no están ligado. Por lo tanto usaremos un conjunto de SNPs con bajo LD
 
 ```sh
 plink --bfile MDS_merge --extract indepSNP.prune.in --genome --out MDS_merge
@@ -587,7 +591,7 @@ plink --bfile MDS_merge --read-genome MDS_merge.genome --cluster --mds-plot 10 -
 
 *** Nota***: esto no reduce el tamaño del conjunto de datos MDS_merge, solo crea el archivo `MDS_merge.genome` para el set reducido de SNPs con bajo LD.
 
-### MDS-plot
+### Paso 2: Generar un archivo con información de poblaciones
 
 Descargue el archivo con información de población del conjunto de datos de 1000 genomas.
 
@@ -628,7 +632,7 @@ Concatenar los archivos de carrera.
 cat ethnicity_1kG14.txt ethnicityfile_CLG.txt | sed -e '1i \ FID IID ethnicity'> ethnicityfile.txt
 ```
 
-Generar parcela de estratificación poblacional.
+### Paso 3: Graficar resultados de MDS
 
 ```sh
 Rscript $W/MDS_merged.R
@@ -661,11 +665,11 @@ Rscript $W/MDS_merged.R
 
 1. En R, genere gráficos similares para las combinaciones Component 2 vs 3 y 3 vs 4. ¿Qué puede concluir de estos gráficos?
 
-## Realizar un análisis de ancestría
+### Paso 4: Realizar un análisis de ancestría
 
 Utilizaremos la herramienta [ADMIXTURE](http://software.genetics.ucla.edu/admixture/) para inferir ancestría de las muestras chilenas asumiendo un modelo simple de mezcla.
 
-### Paso 1: filtrar los SNPs
+#### Filtrar los SNPs
 
 Admixture asumen que los SNPs a usar no están en LD. Tendremos que usar nuevamente nuestro archivo con SNPs en bajo LD, pero esta vez sí crearemos un set plink de datos reducidos
 
@@ -678,7 +682,7 @@ plink --bfile MDS_merge --extract indepSNP.prune.in --make-bed --out MDS_merge_r
 1. ¿Cuántos SNPs quedaron luego del filtro?
 2. ADMIXTURE asume que los individuos no están emparentados. Sin embargo, no realizamos ningún filtro. ¿Por qué?
 
-### Paso 2: correr admixture
+### Paso 5: Correr admixture
 
 Ahora sí podemos correr ADMIXTURE.
 
@@ -706,7 +710,7 @@ for k in $(seq 4 6)
   done
 ```
 
-### Paso 3: Genere gráficos de sus resultados
+### Paso 6: Genere gráficos de sus resultados
 
 Primero tenemos que ordenar el archivo con la información de las muestras por públición. Esto es un requisito para el siguiente paso. Aquí elegiremos el orden en el que queremos que se muestren las poblaciones, mediante unos pocos comandos en R.
 
