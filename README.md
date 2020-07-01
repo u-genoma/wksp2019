@@ -26,20 +26,22 @@ Esperamos poder contar con su participación en esta actividad Académica.
 
 #### Unidad 1
 
-#### **9:00 – 10:50** Parte 1 - Lenguajes de programación
+#### **9:00 – 10:50** - Lenguajes de programación
 
 - Linux y BASH
 - Intro a R
 
 **10:50 - 11:00** Receso
 
-#### **11:10 - 13:00** Parte 2 - Documentación y reproducibilidad
+#### Unidad 2
+
+#### **11:10 - 13:00** - Documentación y reproducibilidad
 
 - Markdown
 - Jupyter Notebook
 - Docker
 
-#### Unidad 2
+#### Unidad 3
 
 #### **14:00 - 15:50** Parte 1 - Control de calidad
 
