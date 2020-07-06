@@ -291,7 +291,7 @@ Filtre los SNPs que no cumplen con el filtro MAX>0,000001.
 plink --bfile chilean_all48_hg19_8 --hwe 1e-6 --hwe-all --make-bed --out chilean_all48_hg19_9
 ```
 
-*** Nota:*** en el tutorial de GWA se eliminan individuos con heterocigocidad > y < a 3 desviaciones estándar, dado que sugieren mezcla de muestras o consanguinidad. No está claro que este criterio sea válido poblaciones mestizas. Aquí saltaremos ese filtro, principalmente para ahorrar tiempo.
+*** Nota:*** en el tutorial de GWA se eliminan individuos con heterocigocidad mayor o menor a 3 desviaciones estándar desde el promedio, dado que sugieren mezcla de muestras o consanguinidad. No está claro que este criterio sea válido poblaciones mestizas. Aquí saltaremos ese filtro, principalmente para ahorrar tiempo.
 
 #### Tarea
 
@@ -300,7 +300,7 @@ plink --bfile chilean_all48_hg19_8 --hwe 1e-6 --hwe-all --make-bed --out chilean
 
 ### Paso 5: Eliminar parentescos desconocidos
 
-Es muy importante revisar si existen parentesco desconocidos en el set de datos, porque pueden segar las estimaciones de ancestría (y de asociación con fenotipos).
+Es muy importante revisar si existen parentesco desconocidos en el set de datos, porque pueden sesgar las estimaciones de ancestría (y de asociación con fenotipos).
 
 Las pruebas de parentesco asumen que los SNP no están correlacionados, vale decir que no tienen un fuerte ligamiento. Para generar una lista de SNPs sin correlaciones muy altas, exploremos regiones de inversión (inversion.txt [regiones con alto LD]) y eliminaremos SNPs con el argumento  `command --indep-pairwise`.
 
@@ -314,64 +314,33 @@ plink --bfile chilean_all48_hg19_9 --extract indepSNP.prune.in --genome --min 0.
 ```
 Visualice las primeras líneas del resultado.
 ```sh
-$ head pihat_min0.2.genome
-     FID1     IID1     FID2     IID2 RT    EZ      Z0      Z1      Z2  PI_HAT PHE       DST     PPC   RATIO
-  CDSJ177  CDSJ177   ARI001   ARI001 UN    NA  0.4733  0.5267  0.0000  0.2634  -1  0.788650  1.0000  3.6279
-  CDSJ021  CDSJ021   ARI001   ARI001 UN    NA  0.5359  0.4641  0.0000  0.2320  -1  0.773401  1.0000  3.5860
-   ARI006   ARI006   ARI001   ARI001 UN    NA  0.4314  0.5686  0.0000  0.2843  -1  0.787614  1.0000  4.2789
-   ARI021   ARI021   ARI018   ARI018 UN    NA  0.6915  0.1554  0.1530  0.2307  -1  0.848091  1.0000  2.6656
-   ARI021   ARI021   ARI015   ARI015 UN    NA  0.6506  0.2759  0.0736  0.2115  -1  0.841702  1.0000  3.1995
-   ARI021   ARI021   ARI001   ARI001 UN    NA  0.4205  0.5795  0.0000  0.2897  -1  0.792681  1.0000  4.1797
-   ARI021   ARI021   ARI019   ARI019 UN    NA  0.6748  0.2174  0.1078  0.2165  -1  0.843969  1.0000  2.8519
-  CDSJ174  CDSJ174   ARI001   ARI001 UN    NA  0.5196  0.4804  0.0000  0.2402  -1  0.772496  1.0000  3.4360
-  CDSJ175  CDSJ175   ARI001   ARI001 UN    NA  0.4559  0.5441  0.0000  0.2720  -1  0.788864  1.0000  3.8086
+$ head pihat_min0.2.genome | cut -c 1-77
+     FID1     IID1     FID2     IID2 RT    EZ      Z0      Z1      Z2  PI_HAT
+  CDSJ177  CDSJ177   ARI001   ARI001 UN    NA  0.4733  0.5267  0.0000  0.2634
+  CDSJ021  CDSJ021   ARI001   ARI001 UN    NA  0.5359  0.4641  0.0000  0.2320
+   ARI006   ARI006   ARI001   ARI001 UN    NA  0.4314  0.5686  0.0000  0.2843
+   ARI021   ARI021   ARI018   ARI018 UN    NA  0.6915  0.1554  0.1530  0.2307
+   ARI021   ARI021   ARI015   ARI015 UN    NA  0.6506  0.2759  0.0736  0.2115
+   ARI021   ARI021   ARI001   ARI001 UN    NA  0.4205  0.5795  0.0000  0.2897
+   ARI021   ARI021   ARI019   ARI019 UN    NA  0.6748  0.2174  0.1078  0.2165
+  CDSJ174  CDSJ174   ARI001   ARI001 UN    NA  0.5196  0.4804  0.0000  0.2402
+  CDSJ175  CDSJ175   ARI001   ARI001 UN    NA  0.4559  0.5441  0.0000  0.2720
+$ head pihat_min0.2.genome | cut -c 78-
+ PHE       DST     PPC   RATIO
+  -1  0.788650  1.0000  3.6279
+  -1  0.773401  1.0000  3.5860
+  -1  0.787614  1.0000  4.2789
+  -1  0.848091  1.0000  2.6656
+  -1  0.841702  1.0000  3.1995
+  -1  0.792681  1.0000  4.1797
+  -1  0.843969  1.0000  2.8519
+  -1  0.772496  1.0000  3.4360
+  -1  0.788864  1.0000  3.8086
 ```
-
-
-```
-> setwd("~/rverdugo/Tutorial_PopGeno")
-> rel <- read.table("pihat_min0.2.genome", header=T)
-> table(rel$IID1)
-
- ARI001  ARI002  ARI003  ARI004  ARI006  ARI008  ARI013  ARI015  ARI017  ARI018  ARI021 
-     11       1       1       1       1       1       1       1       1       2       4 
- ARI023 CDSJ020 CDSJ021 CDSJ046 CDSJ099 CDSJ122 CDSJ157 CDSJ174 CDSJ175 CDSJ177 CDSJ262 
-      1       1       1       1       1       1       1       1       1       1       1 
-CDSJ283 CDSJ284 CDSJ297 CDSJ299 CDSJ347 CDSJ361 CDSJ372 CDSJ400 CDSJ403 CDSJ469 CDSJ471 
-      1       1       1       1       1       1       1       1       1       1       1 
-CDSJ472 
-      1 
-> table(rel$IID2)
-
- ARI001  ARI008  ARI014  ARI015  ARI018  ARI019 CDSJ032 CDSJ048 CDSJ106 CDSJ108 CDSJ167 
-     32       1       2       1       1       3       1       1       1       1       1 
-CDSJ321 CDSJ344 CDSJ417 
-      1       1       1 
-```
-
- Claramente el individuo ARI001 genera la mayoría de los aparentes parentescos. Revisemos qué parentescos quedan si eliminamos este individuo.
-
-```R
-> subset(rel, !IID1 %in% "ARI001" & !IID2 %in% "ARI001")
-     FID1   IID1   FID2   IID2 RT EZ     Z0     Z1     Z2 PI_HAT PHE      DST PPC
-4  ARI021 ARI021 ARI018 ARI018 UN NA 0.6915 0.1554 0.1530 0.2307  -1 0.848091   1
-5  ARI021 ARI021 ARI015 ARI015 UN NA 0.6506 0.2759 0.0736 0.2115  -1 0.841702   1
-7  ARI021 ARI021 ARI019 ARI019 UN NA 0.6748 0.2174 0.1078 0.2165  -1 0.843969   1
-16 ARI018 ARI018 ARI014 ARI014 UN NA 0.4936 0.4438 0.0626 0.2845  -1 0.852064   1
-48 ARI008 ARI008 ARI019 ARI019 UN NA 0.6189 0.3611 0.0200 0.2005  -1 0.837686   1
-    RATIO
-4  2.6656
-5  3.1995
-7  2.8519
-16 4.0182
-48 3.3516
-```
-
-El individuo ARI021 y el ARI018 también son candidatos a ser eliminados. Sin bien ARI008 y ARI019 tienen un coeficiente de parentesco de 0.2005, está muy cerca del límite que queremos aceptar así que los dejaremos. Además, hay que considerar que los coeficientes de parentesco pueden estar sobre estimados en individuos mestizos. El software [REAP](https://www.ncbi.nlm.nih.gov/pubmed/22748210) puede dar cuenta de esto y generar mejores estimaciones.
 
 Genere gráficos para evaluar estos parentesco con el siguientes script en R.
 ```sh
-Rscript --no-save $T/Relatedness.R
+Rscript --no-save $W/Relatedness.R
 ```
 
 ![hist_relatedness.png](img/hist_relatedness.png)
@@ -383,7 +352,7 @@ Usemos R para investigar cuáles son los individuos que están generando más pr
 
 
 ```
-> setwd("~/rverdugo/Tutorial_PopGeno")
+$ R
 > rel <- read.table("pihat_min0.2.genome", header=T)
 > table(rel$IID1)
 
@@ -429,7 +398,7 @@ $ awk '$2=="ARI001" || $2=="ARI021" || $2=="ARI018"' chilean_all48_hg19_9.fam > 
 ```
 Borre los individuos (en este caso solo uno) con la menor tasa de genotipificación por cada par con pihat > 0,2 .
 ```sh
-$ plink -bfile chilean_all48_hg19_9 -remove to_romeve_by_relatedness.txt -make-bed --out chilean_all48_hg_10
+$ plink -bfile chilean_all48_hg19_9 -remove to_romeve_by_relatedness.txt -make-bed --out chilean_all48_hg19_10
 ```
 
 #### Tarea
@@ -456,13 +425,13 @@ Adicionalmente usaremos datos obtenidos del proyecto 1000G. El preprocesamiento 
 Elimine variantes duplicadas del set ChileGenomico
 
 ```sh
-plink --bfile chilean_all48_hg19_10 --list-duplicate-vars suppress-first
-plink --bfile chilean_all48_hg19_10 --exclude plink.dupvar --make-bed --out chilean_all48_hg19_11
+$ plink --bfile chilean_all48_hg19_10 --list-duplicate-vars suppress-first
+$ plink --bfile chilean_all48_hg19_10 --exclude plink.dupvar --make-bed --out chilean_all48_hg19_11
 ```
 
 ```sh
-plink --bfile chilean_all48_hg19_10 --list-duplicate-vars suppress-first
-plink --bfile chilean_all48_hg19_10 --exclude plink.dupvar --make-bed --out chilean_all48_hg19_11
+$ plink --bfile chilean_all48_hg19_10 --list-duplicate-vars suppress-first
+$ plink --bfile chilean_all48_hg19_10 --exclude plink.dupvar --make-bed --out chilean_all48_hg19_11
 ```
 
 
@@ -471,7 +440,7 @@ plink --bfile chilean_all48_hg19_10 --exclude plink.dupvar --make-bed --out chil
 Extraiga las variantes presentes en los datos de ChileGenomico.
 
 ```sh
-cut -f 2 chilean_all48_hg19_11.bim | sort -u > chilean_all48_hg19_11.snps
+$ cut -f 2 chilean_all48_hg19_11.bim | sort -u > chilean_all48_hg19_11.snps
 ```
 
 *** Nota:*** usamos un pipe para order la lista de snps dado que es un requisito para el siguiente comando.
@@ -479,7 +448,7 @@ cut -f 2 chilean_all48_hg19_11.bim | sort -u > chilean_all48_hg19_11.snps
 Extraiga las variantes presentes en los datos de 1000G.
 
 ```sh
-cut -f 2 $G/1kG_MDS5.bim | sort -u  > 1kG_MDS5.snps
+$ cut -f 2 $G/1kG_MDS5.bim | sort -u  > 1kG_MDS5.snps
 ```
 
 ***Nota:*** Usamos `$G` para buscar el set `1kG_MFS5.bim` en su carpeta en vez de copiarla al directorio de trabajo. 
@@ -487,35 +456,35 @@ cut -f 2 $G/1kG_MDS5.bim | sort -u  > 1kG_MDS5.snps
 Encuentre la lista de SNPs en común entre ambos sets de datos.
 
 ```sh
-comm -12 chilean_all48_hg19_11.snps 1kG_MDS5.snps > common_snps.txt
+$ comm -12 chilean_all48_hg19_11.snps 1kG_MDS5.snps > common_snps.txt
 ```
 
 Extraiga los SNPs en común del set 1000G
 
 ```sh
-plink --bfile $G/1kG_MDS5 --extract common_snps.txt --recode --make-bed --out 1kG_MDS6
+$ plink --bfile $G/1kG_MDS5 --extract common_snps.txt --recode --make-bed --out 1kG_MDS6
 ```
 
 Extraiga los SNPs en común del set ChileGenomico
 
 ```sh
-plink --bfile chilean_all48_hg19_11 --extract common_snps.txt --make-bed --out chilean_all48_hg19_12
+$ plink --bfile chilean_all48_hg19_11 --extract common_snps.txt --make-bed --out chilean_all48_hg19_12
 ```
 
 Los conjuntos de datos ahora contienen exactamente las mismas variantes.
 
 ### Paso 2: Homologar la versión del genoma
 
-Los conjuntos de datos deben tener la misma versión de ensamble del genoma para usar las mismas coordenadas de SNPs. Cambia la compilación de datos de 1000 genomas.
+Los conjuntos de datos deben tener la misma versión de ensamble del genoma para usar las mismas coordenadas de SNPs. Para asegurarnos, cambiaremos las coordenadas en los datos de 1000 genomas usando las coordenadas de ChileGenomico.
 
 ```sh
-awk '{print $2, $4}' chilean_all48_hg19_12.bim> buildhapmap.txt
+$ awk '{print $2, $4}' chilean_all48_hg19_12.bim> buildhapmap.txt
 ```
 
 buildhapmap.txt contiene un ID y una posición física por SNP en cada línea.
 
 ```
-plink --bfile 1kG_MDS6 --update-map buildhapmap.txt --make-bed --out 1kG_MDS7
+$ plink --bfile 1kG_MDS6 --update-map buildhapmap.txt --make-bed --out 1kG_MDS7
 ```
 
 chilean_all48_hg19_12 y 1kG_MDS7 ahora tienen las mismas coordenadas.
@@ -529,19 +498,19 @@ Antes de fusionar los datos de ChileGenomico con los datos de HapMap, queremos a
 
 Los siguientes pasos pueden ser bastante técnicos en términos de comandos, pero solo comparamos los dos conjuntos de datos y nos aseguramos de que correspondan.
 
-1) establecer el genoma de referencia
+1) establecer el genoma de referencia en ChileGenomico usando 1000G:
 
 ```sh
-awk '{print $2, $5}' 1kG_MDS7.bim> 1kG_ref-list.txt
-plink --bfile chilean_all48_hg19_12 --reference-allele 1kG_ref-list.txt --make-bed --out chilean_all48_hg19_13
+$ awk '{print $2, $5}' 1kG_MDS7.bim> 1kG_ref-list.txt
+$ plink --bfile chilean_all48_hg19_12 --reference-allele 1kG_ref-list.txt --make-bed --out chilean_all48_hg19_13
 ```
 
-Los conjuntos de datos  1kG y  chilean_all48_hg19_13 tienen el mismo genoma (alelo) de referencia para todos los SNP.
+Los conjuntos de datos 1kG y chilean_all48_hg19_13 tienen el mismo genoma (alelo) de referencia para todos los SNP.
 
 Este comando podría generar algunas advertencias para la asignación imposible del alelo A1. Es bueno revisar:
 
 ```sh
-grep "Impossible" chilean_all48_hg19_13.log | wc -l
+$ grep "Impossible" chilean_all48_hg19_13.log | wc -l
 0
 ```
 
@@ -551,10 +520,10 @@ En este caso no se encontraron inconsistencias. Si la hubiere, podría indicar e
 Compruebe si hay posibles problemas de filamento.
 
 ```sh
-awk '{print $2, $5, $6}' 1kG_MDS7.bim> 1kG_MDS7_tmp
-awk '{print $2, $5, $6}' chilean_all48_hg19_13.bim > chilean_all48_hg19_13_tmp
-sort 1kG_MDS7_tmp chilean_all48_hg19_13_tmp | uniq -u > all_differences.txt
-wc -l all_differences.txt
+$ awk '{print $2, $5, $6}' 1kG_MDS7.bim> 1kG_MDS7_tmp
+$ awk '{print $2, $5, $6}' chilean_all48_hg19_13.bim > chilean_all48_hg19_13_tmp
+$ sort 1kG_MDS7_tmp chilean_all48_hg19_13_tmp | uniq -u > all_differences.txt
+$ wc -l all_differences.txt
 0 all_differences.txt
 ```
 
@@ -567,7 +536,7 @@ Este paso no tendrá efecto alguno sobre los datos porque no hay SNPs con proble
 Imprima el identificador SNP y elimine los duplicados.
 
 ```sh
-awk '{print $ 1}' all_differences.txt | sort -u > flip_list.txt
+$ awk '{print $ 1}' all_differences.txt | sort -u > flip_list.txt
 ```
 
 Se genera un archivo de SNPs no coincidentes entre los dos archivos.
@@ -575,15 +544,15 @@ Se genera un archivo de SNPs no coincidentes entre los dos archivos.
 Intercambiar los alelos de los SNPs no coincidentes.
 
 ```sh
-plink --bfile chilean_all48_hg19_13 -flip flip_list.txt --reference-allele 1kG_ref-list.txt --make-bed --out chilean_all48_hg19_14
+$ plink --bfile chilean_all48_hg19_13 -flip flip_list.txt --reference-allele 1kG_ref-list.txt --make-bed --out chilean_all48_hg19_14
 ```
 
 Compruebe si hay SNPs que siguen siendo problemáticos después de haberlos volteado.
 
 ```sh
-awk '{print $2, $5, $6}' chilean_all48_hg19_14.bim > chilean_all48_hg19_14_tmp
-sort 1kG_MDS7_tmp chilean_all48_hg19_14_tmp | uniq -u> uncorresponding_SNPs.txt
-wc -l uncorresponding_SNPs.txt
+$ awk '{print $2, $5, $6}' chilean_all48_hg19_14.bim > chilean_all48_hg19_14_tmp
+$ sort 1kG_MDS7_tmp chilean_all48_hg19_14_tmp | uniq -u> uncorresponding_SNPs.txt
+$ wc -l uncorresponding_SNPs.txt
 0 uncorresponding_SNPs.txt
 ```
 
@@ -592,7 +561,7 @@ Este archivo demuestra que hay 0 diferencias entre los archivos, o sea, no hay S
 3) Eliminar SNPs problemáticos de 1kG y ChileGenomico. En este caso, este paso es innecesario ya que no quedan SNPs con problemas, pero se muestran por completitud.
 
 ```sh
-awk '{print $ 1}' uncorresponding_SNPs.txt | sort -u > SNPs_for_exlusion.txt
+$ awk '{print $ 1}' uncorresponding_SNPs.txt | sort -u > SNPs_for_exlusion.txt
 ```
 
 El comando anterior genera una lista de los 0 SNP que causaron las 0 diferencias entre los conjuntos de datos 1kG y ChileGenomico después de cambiar y configurar el genoma de referencia.
@@ -600,14 +569,14 @@ El comando anterior genera una lista de los 0 SNP que causaron las 0 diferencias
 Elimine los SNPs problemáticos de ambos conjuntos de datos.
 
 ```sh
-plink --bfile 1kG_MDS7 --exclude SNPs_for_exlusion.txt --make-bed --out 1kG_MDS8
-plink --bfile chilean_all48_hg19_14 --exclude SNPs_for_exlusion.txt --make-bed --out chilean_all48_hg19_15
+$ plink --bfile 1kG_MDS7 --exclude SNPs_for_exlusion.txt --make-bed --out 1kG_MDS8
+$ plink --bfile chilean_all48_hg19_14 --exclude SNPs_for_exlusion.txt --make-bed --out chilean_all48_hg19_15
 ```
 
 ### Paso 5: Combinar 1000G con ChileGenomico.
 
 ```sh
-plink --bfile 1kG_MDS8 --bmerge chilean_all48_hg19_14.bed chilean_all48_hg19_14.bim chilean_all48_hg19_14.fam --allow-no-sex --make-bed --out MDS_merge
+$ plink --bfile 1kG_MDS8 --bmerge chilean_all48_hg19_15.bed chilean_all48_hg19_15.bim chilean_all48_hg19_15.fam --allow-no-sex --make-bed --out MDS_merge
 ```
 
 
@@ -616,21 +585,21 @@ plink --bfile 1kG_MDS8 --bmerge chilean_all48_hg19_14.bed chilean_all48_hg19_14.
 
 ### Paso 1: Realizar MDS en datos HapMap-ChileGenomico
 
-Se asume que los SNPs no están ligado. Por lo tanto usaremos un conjunto de SNPs con bajo LD
+Se asume que los SNPs no están ligados. Por lo tanto usaremos un conjunto de SNPs con bajo LD
 
 ```sh
-plink --bfile MDS_merge --extract indepSNP.prune.in --genome --out MDS_merge
-plink --bfile MDS_merge --read-genome MDS_merge.genome --cluster --mds-plot 10 --out MDS_merge
+$ plink --bfile MDS_merge --extract indepSNP.prune.in --genome --out MDS_merge2
+$ plink --bfile MDS_merge --read-genome MDS_merge2.genome --cluster --mds-plot 10 --out MDS_merge3
 ```
 
-*** Nota***: esto no reduce el tamaño del conjunto de datos MDS_merge, solo crea el archivo `MDS_merge.genome` para el set reducido de SNPs con bajo LD.
+*** Nota***: esto no reduce el tamaño del conjunto de datos MDS_merge2, solo crea el archivo `MDS_merge2.genome` para el set reducido de SNPs con bajo LD.
 
 ### Paso 2: Generar un archivo con información de poblaciones
 
 Descargue el archivo con información de población del conjunto de datos de 1000 genomas.
 
 ```sh
-wget ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20100804/20100804.ALL.panel
+$ wget ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20100804/20100804.ALL.panel
 ```
 
 El archivo 20100804.ALL.panel contiene códigos de población de los individuos de 1000 genomas.
@@ -657,19 +626,19 @@ sed 's/PUR/AMR/g' ethnicity_1kG13.txt>ethnicity_1kG14.txt
 Crea un archivo de etnicidad de los datos de ChileGenomico.
 
 ```sh
-awk '{if($1~/CDSJ/) pop="MAP"}{if($1~/ARI/) pop="AYM"} {print $1, $2, pop}' chilean_all48_hg19_14.fam > ethnicityfile_CLG.txt
+$ awk '{if($1~/CDSJ/) pop="MAP"}{if($1~/ARI/) pop="AYM"} {print $1, $2, pop}' chilean_all48_hg19_14.fam > ethnicityfile_CLG.txt
 ```
 
 Concatenar los archivos de carrera.
 
 ```sh
-cat ethnicity_1kG14.txt ethnicityfile_CLG.txt | sed -e '1i \ FID IID ethnicity'> ethnicityfile.txt
+$ cat ethnicity_1kG14.txt ethnicityfile_CLG.txt | sed -e '1i \ FID IID ethnicity'> ethnicityfile.txt
 ```
 
 ### Paso 3: Graficar resultados de MDS
 
 ```sh
-Rscript $W/MDS_merged.R
+$ Rscript $W/MDS_merged.R
      IID  FID.x SOL         C1          C2         C3           C4           C5
 1 ARI001 ARI001   0 -0.0406769 -0.01424110 -0.0924081  0.001803800 -0.001256100
 2 ARI002 ARI002   0 -0.0469810 -0.00404251 -0.0788820  0.001140350 -0.001596390
@@ -706,7 +675,7 @@ Utilizaremos la herramienta [ADMIXTURE](http://software.genetics.ucla.edu/admixt
 Admixture asumen que los SNPs a usar no están en LD. Tendremos que usar nuevamente nuestro archivo con SNPs en bajo LD, pero esta vez sí crearemos un set plink de datos reducidos
 
 ```sh
-plink --bfile MDS_merge --extract indepSNP.prune.in --make-bed --out MDS_merge_r2_lt_0.2
+$ plink --bfile MDS_merge --extract indepSNP.prune.in --make-bed --out MDS_merge_r2_lt_0.2
 ```
 
 1. ¿Cuántos SNPs quedaron luego del filtro?
@@ -715,7 +684,7 @@ plink --bfile MDS_merge --extract indepSNP.prune.in --make-bed --out MDS_merge_r
 Ahora sí podemos correr ADMIXTURE.
 
 ```sh
-admixture -j4 --cv MDS_merge_r2_lt_0.2.bed 3 > MDS_merge_r2_lt_0.2.K3.log
+$ admixture -j4 --cv MDS_merge_r2_lt_0.2.bed 3 > MDS_merge_r2_lt_0.2.K3.log
 ```
 
 Los argumentos usados fueron:
@@ -734,7 +703,7 @@ Repitamos el procesos para valores K de 4 a 6 usando un loop.
 ```sh
 for k in $(seq 4 6)
   do
-    admixture -j4 --cv MDS_merge_r2_lt_0.2.bed $k > MDS_merge_r2_lt_0.2.K$k.log
+    admixture -j44 --cv MDS_merge_r2_lt_0.2.bed $k > MDS_merge_r2_lt_0.2.K$k.log
   done
 ```
 
@@ -748,7 +717,7 @@ for k in $(seq 4 6)
 Primero tenemos que ordenar el archivo con la información de las muestras por públición. Esto es un requisito para el siguiente paso. Aquí elegiremos el orden en el que queremos que se muestren las poblaciones, mediante unos pocos comandos en R.
 
 ```sh
-R --no-save
+$ R --no-save
 ```
 
 ```R
@@ -758,6 +727,7 @@ names(popinfo_ls)
 [1] "AFR" "AMR" "ASN" "AYM" "EUR" "MAP"
 popinfo_sorted <- do.call(rbind, popinfo_ls[c("AFR", "EUR", "ASN", "AMR", "AYM", "MAP")])
 write.table(popinfo_sorted, "popinfo_sorted.txt", sep="\t", row.names=F)
+q()
 ```
 
 
