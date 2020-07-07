@@ -690,12 +690,12 @@ $ admixture -j4 --cv MDS_merge_r2_lt_0.2.bed 3 > MDS_merge_r2_lt_0.2.K3.log
 Los argumentos usados fueron:
 
 ```
-  -j4													usar cuatro hebras de cómputo
-  --cv												realizar validación cruzada
-  MDS_merge_r2_lt_0.2.bed			archivo en formad bed (plink)
-  3														número de poblaciones ancestrales (parámtro K)
-  >														redirección de la salida a un archivo
-  MDS_merge_r2_lt_0.2.K3.log	archivo log con la salida del programa
+  -j4                         usar cuatro hebras de cómputo
+  --cv                        realizar validación cruzada
+  MDS_merge_r2_lt_0.2.bed     archivo en formad bed (plink)
+  3                           número de poblaciones ancestrales (parámtro K)
+  >                           redirección de la salida a un archivo
+  MDS_merge_r2_lt_0.2.K3.log  archivo log con la salida del programa
 ```
 
 Repitamos el procesos para valores K de 4 a 6 usando un loop.
