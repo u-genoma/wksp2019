@@ -81,8 +81,8 @@ Se utilizarán los datos del proyecto 1000G incluidos en el tutorial **GWA_tutor
 ```
 Genere una variable de ambiente $G para almacenar la ruta a los datos de 1000G. Esto servirá para acortar los siguientes comandos.
 ```sh
-export T=/shared/bioinfo1/GWA_tutorial/1_QC_GWAS
-export P=/shared/bioinfo1/GWA_tutorial/2_Population_stratification/
+$ export T=/shared/bioinfo1/GWA_tutorial/1_QC_GWAS
+$ export P=/shared/bioinfo1/GWA_tutorial/2_Population_stratification/
 ```
 **nota 1:** el símbolo ~ es un atajo para el directorio de origen del usuario (home). En este caso, `/shared/bioinfo1`.
 **nota 2:** es importante que no existan espacios al rededor del símbolo igual. Si la tuviera espacios, hay que usar comillas dobles.
@@ -93,7 +93,7 @@ Los datos de ChileGenomico están ubicados en
 ```
 Genere una variable de ambiente para que sea más fácil acceder sus archivos.
 ```sh
-export C=/shared/bioinfo1/ChileGenomico
+$ export C=/shared/bioinfo1/ChileGenomico
 ```
 Los datos de 1000G están ubicados en 
 
@@ -104,7 +104,7 @@ Los datos de 1000G están ubicados en
 Genere una variable de ambiente para que sea más fácil acceder sus archivos.
 
 ```sh
-export G=~/1000G
+$ export G=~/1000G
 ```
 
 Los scripts generados específicamente pare este tutorial se encuentran en 
@@ -116,7 +116,7 @@ Los scripts generados específicamente pare este tutorial se encuentran en
 Genere una variable de ambiente
 
 ```sh
-export W=~/WK2019-PopGeno
+$ export W=~/WK2019-PopGeno
 ```
 
 
@@ -138,13 +138,13 @@ $ cd Tutorial_PopGeno
 ### Paso 1
 Investigar la cantidad de genotipos perdidos los datos de 1000G.
 ```sh
-plink --bfile $C/chilean_all48_hg19 --missing
+$ plink --bfile $C/chilean_all48_hg19 --missing
 ```
 Este paso generó los siguientes archivos: plink.imiss y plink.lmiss, que muestras la proporción de datos perdidos para cada SNP y para cada y individuo, respectivamente.
 
 Genere gráficos para visualizar los resultados
 ```sh
-Rscript --no-save $T/hist_miss.R
+$ Rscript --no-save $T/hist_miss.R
 ```
 Elimine los SNPs e individuos con alto nivel de datos perdidos (>0.02). Se puede encontrar la explicación para este paso y subsecuentes de control de calidad en el box 1 del paper citado y con los comentarios del tutorial asociado.
 
@@ -178,11 +178,11 @@ Revise discrepancias entre entre el sexo declarado en el la tabla de fenotipos (
 
 Calcularemos es valor F, que se basa la estimación del coeficiente de consanguinidad (homocigocidad) en el cromosoma X. Los individuos de sexo femenino deberían tener un valor de F<0.2. Los de sexo masculino, >0,8. El programa PLINK etiquetará a los individuos que no cumplan con ninguna de estas dos condiciones con la palabra "PROBLEM".
 ```sh
-plink --bfile chilean_all48_hg19_5 --check-sex
+$ plink --bfile chilean_all48_hg19_5 --check-sex
 ```
 Genere gráficos para visualizar el resultados del check de sexo.
 ```R
-Rscript --no-save $T/gender_check.R
+$ Rscript --no-save $T/gender_check.R
 ```
 ![Men_check.png](img/Men_check.png)
 
@@ -206,12 +206,12 @@ $  head plink.sexcheck
 ```
 Genere una lista con los individuos con discrepancia de sexo. Este debe tener dos columnas, con el ID de familia y de individuo respectivamente.
 ```sh
-grep "PROBLEM" plink.sexcheck| awk '{print$1,$2}'> sex_discrepancy.txt
+$ grep "PROBLEM" plink.sexcheck | awk '{print$1,$2}'> sex_discrepancy.txt
 ```
 Elimine los individuos con discrepancias
 
 ```sh
-plink --bfile chilean_all48_hg19_5 --remove sex_discrepancy.txt --make-bed --out chilean_all48_hg19_6 
+$ plink --bfile chilean_all48_hg19_5 --remove sex_discrepancy.txt --make-bed --out chilean_all48_hg19_6 
 ```
 
 #### Tarea:
@@ -223,12 +223,12 @@ plink --bfile chilean_all48_hg19_5 --remove sex_discrepancy.txt --make-bed --out
 
 Genere un archivo con SNPs autosomales solamente.
 ```sh
-awk '{ if ($1 >= 1 && $1 <= 22) print $2 }' chilean_all48_hg19_6.bim > snp_1_22.txt
-plink --bfile chilean_all48_hg19_6 --extract snp_1_22.txt --make-bed --out chilean_all48_hg19_7
+$ awk '{ if ($1 >= 1 && $1 <= 22) print $2 }' chilean_all48_hg19_6.bim > snp_1_22.txt
+$ plink --bfile chilean_all48_hg19_6 --extract snp_1_22.txt --make-bed --out chilean_all48_hg19_7
 ```
 Calcule las frecuencias alélicas para cada SNP.
 ```sh
-plink --bfile chilean_all48_hg19_7 --freq --out MAF_check
+$ plink --bfile chilean_all48_hg19_7 --freq --out MAF_check
 ```
 Revise las primeras filas del archivo generado.
 ```sh
@@ -246,7 +246,7 @@ head MAF_check.frq
 ```
 Genere a gráfico de la distribución de frecuencia del alelo menor (MAF por su sigla en inglés Mino Allele Frequency).
 ```sh
-Rscript --no-save $T/MAF_check.R
+$ Rscript --no-save $T/MAF_check.R
 ```
 Elimine los SNPs monomórficos (sin variabilidad). En el set hay, en este punto, 45 individuos, por lo tanto, la menor frecuencia alélica posible para un polimorfismo es 1/(2x45)=0,011. Utilizaremos este valor como mínima MAF.
 *** Nota: *** En el tutorial de GWAS además se borran los SNPs con frecuencia alélica menor a 0,05. Sin embargo eso no es necesario para estudios de estructura.
@@ -271,7 +271,7 @@ Como ve, se eliminaron 98.544 SNPs por el filtro de frecuencia alélica.
 
 ### Paso 4: Borrar SNPs por filtro de HWE
 
-Los SNPs cuyos genotipos tengan frecuencias que se desvíen demasiado desde los valores esperados en Equilibrio de Hardy-Weinberg(HWE) pueden tener errores de genotipificación y deben ser eliminados.
+Los SNPs cuyos genotipos tengan frecuencias que se desvíen demasiado desde los valores esperados en Equilibrio de Hardy-Weinberg (HWE) pueden tener errores de genotipificación y deben ser eliminados.
 
 Revise la distribución de valores de p para el test HWE.
 ```sh
@@ -703,7 +703,7 @@ Repitamos el procesos para valores K de 4 a 6 usando un loop.
 ```sh
 for k in $(seq 4 6)
   do
-    admixture -j44 --cv MDS_merge_r2_lt_0.2.bed $k > MDS_merge_r2_lt_0.2.K$k.log
+    admixture -j44 --cv MDS_merge_r2_lt_0.2.bed $k > MDS_merge_r2_lt_0.2.K$k.log		
   done
 ```
 
