@@ -119,8 +119,6 @@ Genere una variable de ambiente
 $ export W=~/WK2019-PopGeno
 ```
 
-
-
 ### Generar un directorio de trabajo
 
 Genere un directorio para realizar su trabajo usando la inicial de su nombre y su apellido:
@@ -132,6 +130,14 @@ Genere un directorio dentro de este, para la realización de este tutorial:
 ```sh
 $ mkdir Tutorial_PopGeno
 $ cd Tutorial_PopGeno
+```
+
+### Cargar el software
+
+Para correr programas que no vienen con el sistema, primero debe cargar el módulo respectivo. En este tutorila usariemos Plink v1.9 y R v4.0.5
+```sh
+$ module load plink/1.90
+$ module load R/4.0.5
 ```
 
 ## Parte 1: Análisis de control de calidad
