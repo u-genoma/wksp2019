@@ -77,23 +77,23 @@ $ ssh -Y bioinfo1@genoma.med.uchile.cl
 ### Ubicación de los datos
 Se utilizarán los datos del proyecto 1000G incluidos en el tutorial **GWA_tutorial** obtenido de [este repositorio en GitHub](https://github.com/MareesAT/GWA_tutorial/). Puede encontrar el tutorial completo y los datos en el siguiente directorio:
 ```
-/shared/bioinfo1/GWA_tutorial/
+/datos/compartido/GWA_tutorial/
 ```
 Genere una variable de ambiente $G para almacenar la ruta a los datos de 1000G. Esto servirá para acortar los siguientes comandos.
 ```sh
-$ export T=/shared/bioinfo1/GWA_tutorial/1_QC_GWAS
-$ export P=/shared/bioinfo1/GWA_tutorial/2_Population_stratification/
+$ export T=/datos/compartido/GWA_tutorial/1_QC_GWAS
+$ export P=/datos/compartido/GWA_tutorial/2_Population_stratification/
 ```
 **nota 1:** el símbolo ~ es un atajo para el directorio de origen del usuario (home). En este caso, `/shared/bioinfo1`.
 **nota 2:** es importante que no existan espacios al rededor del símbolo igual. Si la tuviera espacios, hay que usar comillas dobles.
 
 Los datos de ChileGenomico están ubicados en 
 ```
-/shared/bioinfo1/ChileGenomico/
+ /datos/compartido/ChileGenomico/
 ```
 Genere una variable de ambiente para que sea más fácil acceder sus archivos.
 ```sh
-$ export C=/shared/bioinfo1/ChileGenomico
+$ export C=/datos/compartido/ChileGenomico
 ```
 Los datos de 1000G están ubicados en 
 
