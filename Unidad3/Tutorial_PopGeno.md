@@ -346,7 +346,7 @@ $ head pihat_min0.2.genome | cut -c 78-
 
 Genere gráficos para evaluar estos parentesco con el siguientes script en R.
 ```sh
-Rscript --no-save $W/Relatedness.R
+Rscript --no-save $T/Relatedness.R
 ```
 
 ![hist_relatedness.png](img/hist_relatedness.png)
